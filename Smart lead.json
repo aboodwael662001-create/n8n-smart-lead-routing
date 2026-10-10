@@ -1,0 +1,749 @@
+{
+  "name": "Smart lead",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4368a4f6-0a78-4631-bb80-e6a4c644ea98",
+              "name": "=Full name",
+              "value": "={{ $json.body.data.fields[0].value }}",
+              "type": "string"
+            },
+            {
+              "id": "41bba7cb-be7c-4bb2-a2f1-aa3f96c303aa",
+              "name": "Email :",
+              "value": "={{ $json.body.data.fields[1].value }}",
+              "type": "string"
+            },
+            {
+              "id": "306142d9-e89c-4e73-ad87-f75ce2389ea8",
+              "name": "Company:",
+              "value": "={{ $json.body.data.fields[2].value }}",
+              "type": "string"
+            },
+            {
+              "id": "4c79d80b-be5d-48bc-b762-5ddbe88d2c1b",
+              "name": "Company size:",
+              "value": "={{ $json.body.data.fields[3].value }}",
+              "type": "number"
+            },
+            {
+              "id": "75158078-30fd-46b4-849b-f4bc2ce92f48",
+              "name": "Estimated Value:",
+              "value": "={{ $json.body.data.fields[4].value }}",
+              "type": "number"
+            },
+            {
+              "id": "6fe867c0-8993-47ab-b92a-928e73c528a5",
+              "name": "Country:",
+              "value": "={{ $json.body.data.fields[5].value }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        -32
+      ],
+      "id": "6bdfc208-c682-49be-865b-b6869b641539",
+      "name": "Prepare Lead Data"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eda9f0d8-c702-4284-ae1a-d5d5a760e0bc",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        -32
+      ],
+      "id": "a5ba0384-c56f-48bb-9236-786b7a4e12f2",
+      "name": "Receive Lead",
+      "webhookId": "eda9f0d8-c702-4284-ae1a-d5d5a760e0bc"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1e0b4e2c-574a-4789-a542-3d6bfe9d13f6",
+              "leftValue": "={{ $json[\"Full name\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "6c889244-0d72-452b-9e06-887764593179",
+              "leftValue": "={{ $json[\"Email :\"] }}",
+              "rightValue": "@",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "b9fb40bd-7693-41b0-a05f-09451cf39cb3",
+              "leftValue": "={{ $json[\"Company:\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "22593c5f-fb9a-4fd7-ac42-a44df3ece700",
+              "leftValue": "={{ $json[\"Company size:\"] }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "a4590559-9b34-47b2-9f97-2d21300f2bfd",
+              "leftValue": "={{ $json[\"Estimated Value:\"] }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "802981f4-7480-46ca-8c74-b3b921abdcbb",
+              "leftValue": "={{ $json[\"Country:\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        256,
+        -32
+      ],
+      "id": "3933ec52-3173-43c5-bb97-03d2bf5066a3",
+      "name": "Validate Lead"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json[\"Estimated Value:\"] }}",
+                    "rightValue": 10000,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "f445fc46-e678-4acd-905e-84adb8c3d67b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "High Value"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b770e61e-bdd6-4e83-9494-aa7fcc01a3dd",
+                    "leftValue": "={{ $json[\"Estimated Value:\"] }}",
+                    "rightValue": 3000,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Medium Value"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4573c6c9-3515-4eaa-9f49-62aed84f336f",
+                    "leftValue": "={{ $json[\"Estimated Value:\"] }}",
+                    "rightValue": 3000,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Low Value"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        -128
+      ],
+      "id": "3cfda20f-9ae9-45d6-9506-6aece27f29e8",
+      "name": "Route Lead by Value"
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apphpg64RGLWuoCjf",
+          "mode": "list",
+          "cachedResultName": "Lead Management",
+          "cachedResultUrl": "https://airtable.com/apphpg64RGLWuoCjf"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbldw9GOFiJFFla6M",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/apphpg64RGLWuoCjf/tbldw9GOFiJFFla6M"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $('Validate Lead').item.json['Full name'] }}",
+            "Email": "={{ $('Validate Lead').item.json['Email :'] }}",
+            "Company": "={{ $('Validate Lead').item.json['Company:'] }}",
+            "Company Size": "={{ $('Validate Lead').item.json['Company size:'] }}",
+            "Estimated Value": "={{ $('Validate Lead').item.json['Estimated Value:'] }}",
+            "Country": "={{ $('Validate Lead').item.json['Country:'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company Size",
+              "displayName": "Company Size",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estimated Value",
+              "displayName": "Estimated Value",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        -400
+      ],
+      "id": "dff8a0ea-3ac3-4aaa-8bfe-f48e1ebe9fc9",
+      "name": "Save Valid Lead1",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "mxTDkFwHjRLHuxrg",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "3ee452ff-cbd5-80e5-b976-000b7ed4c07d",
+          "mode": "list",
+          "cachedResultName": " Sales Follow-up.\n\n",
+          "cachedResultUrl": "https://app.notion.com/p/3ee452ffcbd580d090d1ca30ed9ceb11"
+        },
+        "title": " Sales Follow-up.",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Email|email",
+              "emailValue": "={{ $json['Email :'] }}"
+            },
+            {
+              "key": "Company|rich_text",
+              "textContent": "={{ $json['Company:'] }}"
+            },
+            {
+              "key": "Estimated Value|number",
+              "numberValue": "={{ $json['Estimated Value:'] }}"
+            },
+            {
+              "key": "Lead Category|select",
+              "selectValue": "High Value"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "New"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        816,
+        -240
+      ],
+      "id": "6907cadd-cb17-4aca-a089-7ab4766b130f",
+      "name": "Create High Priority Follow-up",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "c9J6o1NirprXDIyA",
+          "name": "Notion account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "3ee452ff-cbd5-80e5-b976-000b7ed4c07d",
+          "mode": "list",
+          "cachedResultName": " Sales Follow-up.\n\n",
+          "cachedResultUrl": "https://app.notion.com/p/3ee452ffcbd580d090d1ca30ed9ceb11"
+        },
+        "title": " Sales Follow-up.",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Email|email",
+              "emailValue": "={{ $json['Email :'] }}"
+            },
+            {
+              "key": "Company|rich_text",
+              "textContent": "={{ $json['Company:'] }}"
+            },
+            {
+              "key": "Estimated Value|number",
+              "numberValue": "={{ $json['Estimated Value:'] }}"
+            },
+            {
+              "key": "Lead Category|select",
+              "selectValue": "Medium Value"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "New"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        816,
+        -80
+      ],
+      "id": "5d190c82-2a08-48f7-b6f4-73666a6f12d4",
+      "name": "Create Medium Priority Follow-up",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "c9J6o1NirprXDIyA",
+          "name": "Notion account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C6KT8K933",
+          "mode": "list",
+          "cachedResultName": "sales-leads"
+        },
+        "text": "=🔥 NEW HIGH-VALUE LEAD\n\n👤 Name: [{{ $('Receive Lead').item.json.body.data.fields[0].value }}]\n\n🏢 Company: [{{ $('Receive Lead').item.json.body.data.fields[2].value }}]\n\n📧 Email: [ {{ $('Receive Lead').item.json.body.data.fields[1].value }} ]\n\n💰 Estimated Value: [{{ $('Receive Lead').item.json.body.data.fields[4].value }} ]\n\n🌍 Country: [{{ $('Receive Lead').item.json.body.data.fields[5].value }}]\n\n🏢 Company Size: [{{ $('Receive Lead').item.json.body.data.fields[3].value }}]\n\n⚡ Priority: HIGH",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        992,
+        -240
+      ],
+      "id": "b6e290d6-da96-4ad3-8865-9c73d5155241",
+      "name": "Notify Sales - High Value",
+      "webhookId": "dfdace60-dfe5-49f3-a276-9694f052a167",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "Xyu8eGl7R4HKSW2B",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appmJqUsX1ksjYLzv",
+          "mode": "list",
+          "cachedResultName": "invalid",
+          "cachedResultUrl": "https://airtable.com/appmJqUsX1ksjYLzv"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblKdL5vmXyTtW9jT",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appmJqUsX1ksjYLzv/tblKdL5vmXyTtW9jT"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Prepare Lead Data').item.json['Full name'] }}",
+            "Email": "={{ $('Prepare Lead Data').item.json['Email :'] }}",
+            "Company": "={{ $('Prepare Lead Data').item.json['Company:'] }}",
+            "Company Size": "={{ $('Prepare Lead Data').item.json['Company size:'] }}",
+            "Estimated Value": "={{ $('Prepare Lead Data').item.json['Estimated Value:'] }}",
+            "Country": "={{ $('Prepare Lead Data').item.json['Country:'] }}",
+            "Reason": "Failed validation",
+            "Received At": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company Size",
+              "displayName": "Company Size",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estimated Value",
+              "displayName": "Estimated Value",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Received At",
+              "displayName": "Received At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        64
+      ],
+      "id": "c8ded668-4f8f-4755-8a99-f1cc618c6876",
+      "name": "Save Invalid Lead",
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "mxTDkFwHjRLHuxrg",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prepare Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Validate Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Lead": {
+      "main": [
+        [
+          {
+            "node": "Prepare Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Lead": {
+      "main": [
+        [
+          {
+            "node": "Route Lead by Value",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Invalid Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Lead by Value": {
+      "main": [
+        [
+          {
+            "node": "Save Valid Lead1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create High Priority Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Valid Lead1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Medium Priority Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Valid Lead1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Valid Lead1": {
+      "main": [
+        []
+      ]
+    },
+    "Create High Priority Follow-up": {
+      "main": [
+        [
+          {
+            "node": "Notify Sales - High Value",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Medium Priority Follow-up": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5694f7b1-9b70-4bcb-82c4-fab356dab07f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b04ad7fc0f6b73b7df1bfdb90bc66713d6218007f43f8d9ec37d563e68400e56"
+  },
+  "nodeGroups": [],
+  "id": "10ZgqHUwYbc6Dgd9",
+  "tags": []
+}
